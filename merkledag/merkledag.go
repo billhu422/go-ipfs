@@ -2,6 +2,7 @@
 package merkledag
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"strings"
@@ -11,12 +12,13 @@ import (
 	bserv "github.com/ipfs/go-ipfs/blockservice"
 	offline "github.com/ipfs/go-ipfs/exchange/offline"
 
-	zec "github.com/ipfs/go-ipld-zcash"
+	eth "github.com/ipfs/go-ipld-eth"
 	btc "gx/ipfs/QmSDHtBWfSSQABtYW7fjnujWkLpqGuvHzGV3CUj9fpXitQ/go-ipld-btc"
 	logging "gx/ipfs/QmSpJByNKFX1sCsHBEp3R73FL4NF6FnQTEGyNAXHm2GS52/go-log"
 	cid "gx/ipfs/QmV5gPoRsjN1Gid3LMdNZTyfCtP2DsvqEbMAmz82RmmiGk/go-cid"
 	ipldcbor "gx/ipfs/QmW59q2Xq33S7LLnjzUUqbVoYyWd3TP4iMedQF8MKk2U3e/go-ipld-cbor"
 	node "gx/ipfs/QmYDscK7dmdo2GZ9aumS8s5auUUAH5mR1jvj5pYhWusfK7/go-ipld-node"
+	zec "gx/ipfs/QmdSETWRpFvJsyH2a1HaJgoNL5KjDf3Zdcy2k6EaCVBFC5/go-ipld-zcash"
 )
 
 var log = logging.Logger("merkledag")
@@ -119,6 +121,8 @@ func decodeBlock(b blocks.Block) (node.Node, error) {
 		return btc.DecodeBlock(b.RawData())
 	case cid.BitcoinTx:
 		return btc.DecodeTx(b.RawData())
+	case cid.EthereumBlock:
+		return eth.DecodeBlock(bytes.NewReader(b.RawData()))
 	default:
 		return nil, fmt.Errorf("unrecognized object type: %x", c.Type())
 	}

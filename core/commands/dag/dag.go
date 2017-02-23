@@ -12,11 +12,11 @@ import (
 	path "github.com/ipfs/go-ipfs/path"
 
 	eth "github.com/ipfs/go-ipld-eth"
-	zec "github.com/ipfs/go-ipld-zcash"
 	btc "gx/ipfs/QmSDHtBWfSSQABtYW7fjnujWkLpqGuvHzGV3CUj9fpXitQ/go-ipld-btc"
 	cid "gx/ipfs/QmV5gPoRsjN1Gid3LMdNZTyfCtP2DsvqEbMAmz82RmmiGk/go-cid"
 	ipldcbor "gx/ipfs/QmW59q2Xq33S7LLnjzUUqbVoYyWd3TP4iMedQF8MKk2U3e/go-ipld-cbor"
 	node "gx/ipfs/QmYDscK7dmdo2GZ9aumS8s5auUUAH5mR1jvj5pYhWusfK7/go-ipld-node"
+	zec "gx/ipfs/QmdSETWRpFvJsyH2a1HaJgoNL5KjDf3Zdcy2k6EaCVBFC5/go-ipld-zcash"
 )
 
 var DagCmd = &cmds.Command{
@@ -330,7 +330,7 @@ func convertHexToType(r io.Reader, format string) ([]node.Node, error) {
 func convertRawToType(r io.Reader, format string) ([]node.Node, error) {
 	switch format {
 	case "eth":
-		blk, txs, _, err := eth.FromRlpBlockMessage(r)
+		blk, txs, tries, _, err := eth.FromRlpBlockMessage(r)
 		if err != nil {
 			return nil, err
 		}
@@ -339,6 +339,9 @@ func convertRawToType(r io.Reader, format string) ([]node.Node, error) {
 		out = append(out, blk)
 		for _, tx := range txs {
 			out = append(out, tx)
+		}
+		for _, t := range tries {
+			out = append(out, t)
 		}
 		/*
 			for _, unc := range uncles {
