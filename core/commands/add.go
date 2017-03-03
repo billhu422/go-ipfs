@@ -141,8 +141,12 @@ You can now refer to the added file in a gateway, like so:
 		silent, _, _ := req.Option(silentOptionName).Bool()
 		chunker, _, _ := req.Option(chunkerOptionName).String()
 		dopin, _, _ := req.Option(pinOptionName).Bool()
-		rawblks, _, _ := req.Option(rawLeavesOptionName).Bool()
+		rawblks, rawblksFound, _ := req.Option(rawLeavesOptionName).Bool()
 		cidVer, _, _ := req.Option(cidVersionOptionName).Int()
+
+		if cidVer >= 1 && !rawblksFound {
+			rawblks = true
+		}
 
 		if hash {
 			nilnode, err := core.NewNode(n.Context(), &core.BuildCfg{
