@@ -23,16 +23,17 @@ import (
 var ErrDepthLimitExceeded = fmt.Errorf("depth limit exceeded")
 
 const (
-	quietOptionName     = "quiet"
-	silentOptionName    = "silent"
-	progressOptionName  = "progress"
-	trickleOptionName   = "trickle"
-	wrapOptionName      = "wrap-with-directory"
-	hiddenOptionName    = "hidden"
-	onlyHashOptionName  = "only-hash"
-	chunkerOptionName   = "chunker"
-	pinOptionName       = "pin"
-	rawLeavesOptionName = "raw-leaves"
+	quietOptionName      = "quiet"
+	silentOptionName     = "silent"
+	progressOptionName   = "progress"
+	trickleOptionName    = "trickle"
+	wrapOptionName       = "wrap-with-directory"
+	hiddenOptionName     = "hidden"
+	onlyHashOptionName   = "only-hash"
+	chunkerOptionName    = "chunker"
+	pinOptionName        = "pin"
+	rawLeavesOptionName  = "raw-leaves"
+	cidVersionOptionName = "cid-version"
 )
 
 var AddCmd = &cmds.Command{
@@ -78,6 +79,7 @@ You can now refer to the added file in a gateway, like so:
 		cmds.StringOption(chunkerOptionName, "s", "Chunking algorithm to use."),
 		cmds.BoolOption(pinOptionName, "Pin this object when adding.").Default(true),
 		cmds.BoolOption(rawLeavesOptionName, "Use raw blocks for leaf nodes. (experimental)"),
+		cmds.IntOption(cidVersionOptionName, "Cid version. (experimental)").Default(0),
 	},
 	PreRun: func(req cmds.Request) error {
 		quiet, _, _ := req.Option(quietOptionName).Bool()
@@ -140,6 +142,7 @@ You can now refer to the added file in a gateway, like so:
 		chunker, _, _ := req.Option(chunkerOptionName).String()
 		dopin, _, _ := req.Option(pinOptionName).Bool()
 		rawblks, _, _ := req.Option(rawLeavesOptionName).Bool()
+		cidVer, _, _ := req.Option(cidVersionOptionName).Int()
 
 		if hash {
 			nilnode, err := core.NewNode(n.Context(), &core.BuildCfg{
@@ -165,7 +168,7 @@ You can now refer to the added file in a gateway, like so:
 		outChan := make(chan interface{}, 8)
 		res.SetOutput((<-chan interface{})(outChan))
 
-		fileAdder, err := coreunix.NewAdder(req.Context(), n.Pinning, n.Blockstore, dserv)
+		fileAdder, err := coreunix.NewAdder(req.Context(), n.Pinning, n.Blockstore, dserv, cidVer)
 		if err != nil {
 			res.SetError(err, cmds.ErrNormal)
 			return
